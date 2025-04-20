@@ -46,7 +46,7 @@ We are designing an interactive web-based tool that visually demonstrates Kruska
 ![image](https://github.com/user-attachments/assets/0f3a9dc4-1060-40bb-8b8d-47157889bf40)
 
 
-##Demo Video:
+## Demo Video:
 
 https://drive.google.com/file/d/19hp2011YdgmEI0CIqEHKVI9p_l3LlFlj/view?usp=drive_link
 
@@ -58,7 +58,7 @@ https://drive.google.com/file/d/19hp2011YdgmEI0CIqEHKVI9p_l3LlFlj/view?usp=drive
 
 ## Installation
 
-No installation required! Simply open the `index.html` file in any modern web browser.
+No installation required! Simply open the `kruskal.html` file in any modern web browser.
 
 ## Contributing
 
