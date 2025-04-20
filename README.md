@@ -34,12 +34,15 @@ We are designing an interactive web-based tool that visually demonstrates Kruska
 ##Images:
 
 1. Canvas to input vertices and displaying the graph with edges and final MST:
+
 ![image](https://github.com/user-attachments/assets/9e04f8d0-e4db-40ac-8725-b233da1007d1)
 
 2. graph controls:
+
 ![image](https://github.com/user-attachments/assets/de5a5fa1-06c0-4ac1-ac3a-e7b4437c1af4)
 
 3. edges list:
+
 ![image](https://github.com/user-attachments/assets/0f3a9dc4-1060-40bb-8b8d-47157889bf40)
 
 
