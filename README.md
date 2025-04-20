@@ -1,4 +1,4 @@
-# Kruskal-s-Algorithm
+# Kruskal's Algorithm Simulator
 We are designing an interactive web-based tool that visually demonstrates Kruskal's algorithm for finding the Minimum Spanning Tree (MST) in a graph. This project was developed as an educational resource to help students and developers understand graph algorithms through visualization.
 
 ## Features
