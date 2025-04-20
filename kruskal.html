@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kruskal's Algorithm Visualizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Color variables for light/dark themes */
+        :root {
+            --primary-light: #6c5ce7;
+            --secondary-light: #a29bfe;
+            --accent-light: #fd79a8;
+            --bg-light: #f5f6fa;
+            --card-light: #ffffff;
+            --text-light: #2d3436;
+            
+            --primary-dark: #0984e3;
+            --secondary-dark: #74b9ff;
+            --accent-dark: #ff7675;
+            --bg-dark: #1e272e;
+            --card-dark: #2f3640;
+            --text-dark: #f5f6fa;
+            
+            --primary: var(--primary-light);
+            --secondary: var(--secondary-light);
+            --accent: var(--accent-light);
+            --bg: var(--bg-light);
+            --card: var(--card-light);
+            --text: var(--text-light);
+        }
+        
+        /* Dark mode class that overrides variables */
+        .dark-mode {
+            --primary: var(--primary-dark);
+            --secondary: var(--secondary-dark);
+            --accent: var(--accent-dark);
+            --bg: var(--bg-dark);
+            --card: var(--card-dark);
+            --text: var(--text-dark);
+        }
+        
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Header styles */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--card);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo i {
+            font-size: 1.8rem;
+        }
+        
+        /* Background animation circles */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--primary), transparent);
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(50vw, 25vh) rotate(90deg); }
+            50% { transform: translate(100vw, 50vh) rotate(180deg); }
+            75% { transform: translate(50vw, 75vh) rotate(270deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+        
+        /* Theme toggle button */
+        .theme-toggle {
+            background: var(--card);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: none;
+            color: var(--text);
+        }
+        
+        /* Main content container */
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+            padding: 7rem 2rem 2rem; /* Extra top padding for fixed header */
+            gap: 2rem;
+        }
+        
+        /* Canvas section styles */
+        .canvas-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        #graphCanvas {
+            width: 100%;
+            height: 500px;
+            background-color: var(--card);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .status-container {
+            background-color: var(--card);
+            padding: 1rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        #status {
+            font-size: 1rem;
+            color: var(--text);
+        }
+        
+        /* Controls section styles */
+        .controls-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .control-card {
+            background-color: var(--card);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .control-card h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .control-card h2 i {
+            font-size: 1.1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--secondary);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        button {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            margin: 0.5rem 0;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Edges table styles */
+        #edgesTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        #edgesTable th, #edgesTable td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid var(--bg);
+        }
+        
+        #edgesTable th {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        #edgesTable tr:hover {
+            background-color: var(--bg);
+        }
+        
+        .delete-btn {
+            background-color: var(--accent);
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        /* Team section styles */
+        .team-section {
+            margin-top: 2rem;
+            background-color: var(--card);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .team-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            font-size: 1.5rem;
+            position: relative;
+        }
+        
+        .team-header::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            margin: 0.5rem auto 0;
+            border-radius: 3px;
+        }
+        
+        .team-cards {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .team-card {
+            background: var(--card);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s;
+            width: 220px;
+        }
+        
+        .team-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .initials {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .team-card h3 {
+            margin-top: 1rem;
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+        
+        .team-card p {
+            color: var(--text);
+            opacity: 0.8;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+        
+        /* Welcome Popup Styles */
+        .welcome-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .welcome-content {
+            background: linear-gradient(145deg, var(--primary), var(--secondary));
+            padding: 2.5rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            animation: glow 2s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 10px -5px var(--primary);
+            }
+            to {
+                box-shadow: 0 0 20px 5px var(--primary);
+            }
+        }
+        
+        .welcome-content h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .welcome-content p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .start-btn {
+            background: white;
+            color: var(--primary);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1.5rem;
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .start-btn:active {
+            transform: translateY(1px);
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            #graphCanvas {
+                height: 400px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem;
+            }
+            
+            .main-container {
+                padding: 6rem 1rem 1rem;
+            }
+            
+            .control-card {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <!-- Welcome Popup -->
+    <div class="welcome-popup" id="welcomePopup">
+        <div class="welcome-content">
+            <h2>Welcome to Kruskal's Algorithm Visualizer</h2>
+            <p>This interactive tool helps you visualize how Kruskal's algorithm finds the Minimum Spanning Tree (MST) in a graph.</p>
+            <p>Follow these steps:</p>
+            <ol style="text-align: left; margin: 1rem auto; max-width: 400px; color: rgba(255, 255, 255, 0.9);">
+                <li style="margin-bottom: 0.5rem;">Set the number of vertices and click "Place Vertices"</li>
+                <li style="margin-bottom: 0.5rem;">Click on the canvas to place your vertices</li>
+                <li style="margin-bottom: 0.5rem;">Add edges between vertices with weights</li>
+                <li style="margin-bottom: 0.5rem;">Run the algorithm to see the MST construction</li>
+            </ol>
+            <button class="start-btn" id="startBtn">Let's Begin</button>
+        </div>
+    </div>
+
+    <!-- Fixed Header -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-project-diagram"></i>
+            <span>Kruskal's Algorithm Visualizer</span>
+        </div>
+        <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i>
+        </button>
+    </header>
+    
+    <!-- Background animation -->
+    <div class="bg-animation" id="bgAnimation"></div>
+    
+    <!-- Main container -->
+    <div class="main-container">
+        <!-- Left side - Canvas -->
+        <div class="canvas-section">
+            <canvas id="graphCanvas"></canvas>
+            <div class="status-container">
+                <div id="status">Ready to begin. Click "Place Vertices" to start.</div>
+            </div>
+        </div>
+        
+        <!-- Right side - Controls -->
+        <div class="controls-section">
+            <div class="control-card">
+                <h2><i class="fas fa-dot-circle"></i> Graph Controls</h2>
+                <label for="vertexCount">Number of Vertices</label>
+                <input type="number" id="vertexCount" min="2" max="20" value="5">
+                
+                <button id="placeVertices">Place Vertices</button>
+                <button id="clearVertices">Clear Vertices</button>
+            </div>
+            
+            <div class="control-card">
+                <h2><i class="fas fa-link"></i> Edge Controls</h2>
+                <label for="edgeFrom">From Vertex</label>
+                <input type="number" id="edgeFrom" min="1">
+                
+                <label for="edgeTo">To Vertex</label>
+                <input type="number" id="edgeTo" min="1">
+                
+                <label for="edgeWeight">Edge Weight</label>
+                <input type="number" id="edgeWeight" min="1" value="1">
+                
+                <button id="addEdge">Add Edge</button>
+            </div>
+            
+            <div class="control-card">
+                <h2><i class="fas fa-play"></i> Algorithm Controls</h2>
+                <button id="runAlgorithm">Run Algorithm</button>
+                <button id="reset">Reset Algorithm</button>
+                
+                <div id="mstCost" style="margin-top: 1rem; font-weight: bold; color: var(--primary);"></div>
+            </div>
+            
+            <div class="control-card">
+                <h2><i class="fas fa-list"></i> Edges List</h2>
+                <table id="edgesTable">
+                    <thead>
+                        <tr>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Weight</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Team section -->
+    <div class="team-section">
+        <div class="team-header">PROJECT BY</div>
+        <div class="team-cards">
+            <div class="team-card">
+                <div class="initials">U</div>
+                <h3>Umar Ali</h3>
+                <p>Roll No.: 16010123198</p>
+            </div>
+            <div class="team-card">
+                <div class="initials">V</div>
+                <h3>Vedant Narayan</h3>
+                <p>Roll No.: 16010123202</p>
+            </div>
+            <div class="team-card">
+                <div class="initials">J</div>
+                <h3>Jatin Vora</h3>
+                <p>Roll No.: 16010123157</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * INITIALIZATION FUNCTIONS
+         * These functions set up the initial state of the application
+         */
+        
+        // Initialize background animation with floating circles
+        function initBackground() {
+            const bgAnimation = document.getElementById('bgAnimation');
+            const colors = ['var(--primary)', 'var(--secondary)', 'var(--accent)'];
+            
+            // Create 5 animated circles for the background
+            for (let i = 0; i < 5; i++) {
+                const circle = document.createElement('div');
+                circle.className = 'bg-circle';
+                
+                // Random size between 100-400px
+                const size = Math.random() * 300 + 100;
+                circle.style.width = `${size}px`;
+                circle.style.height = `${size}px`;
+                
+                // Random starting position
+                circle.style.left = `${Math.random() * 100}%`;
+                circle.style.top = `${Math.random() * 100}%`;
+                
+                // Random color from our palette
+                circle.style.background = `radial-gradient(circle, ${colors[i % colors.length]}, transparent)`;
+                
+                // Random animation duration (20-50s) and delay
+                const duration = Math.random() * 30 + 20;
+                const delay = Math.random() * -20;
+                circle.style.animation = `float ${duration}s infinite linear ${delay}s`;
+                
+                bgAnimation.appendChild(circle);
+            }
+        }
+        
+        // Set up theme toggle functionality
+        function setupThemeToggle() {
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            
+            // Check for saved theme preference in localStorage
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                body.classList.add(savedTheme);
+                updateThemeIcon(savedTheme);
+            }
+            
+            // Toggle between light/dark mode when button clicked
+            themeToggle.addEventListener('click', () => {
+                body.classList.toggle('dark-mode');
+                const currentTheme = body.classList.contains('dark-mode') ? 'dark-mode' : 'light-mode';
+                localStorage.setItem('theme', currentTheme);
+                updateThemeIcon(currentTheme);
+            });
+        }
+        
+        // Update the theme icon based on current theme
+        function updateThemeIcon(theme) {
+            const icon = document.querySelector('#themeToggle i');
+            icon.className = theme === 'dark-mode' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        
+        // Set up welcome popup
+        function setupWelcomePopup() {
+            const welcomePopup = document.getElementById('welcomePopup');
+            const startBtn = document.getElementById('startBtn');
+            
+            // Check if user has seen the popup before
+            const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+            
+            if (hasSeenWelcome) {
+                welcomePopup.style.display = 'none';
+            } else {
+                welcomePopup.style.display = 'flex';
+            }
+            
+            // Hide popup when start button clicked
+            startBtn.addEventListener('click', () => {
+                welcomePopup.style.display = 'none';
+                localStorage.setItem('hasSeenWelcome', 'true');
+            });
+        }
+        
+        /**
+         * GRAPH FUNCTIONS
+         * These functions handle the graph visualization and algorithm
+         */
+        
+        // Initialize the graph canvas and set up event listeners
+        function initGraph() {
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            const statusDiv = document.getElementById('status');
+            const edgesTable = document.querySelector('#edgesTable tbody');
+            const mstCostDiv = document.getElementById('mstCost');
+
+            // Graph state variables
+            let vertices = [];    // Array to store vertex objects {id, x, y}
+            let edges = [];       // Array to store edge objects {from, to, weight, included, considered}
+            let mstEdges = [];   // Array to store edges in the Minimum Spanning Tree
+            let currentStep = 0;  // Current step in the algorithm
+            let sortedEdges = []; // Edges sorted by weight for Kruskal's algorithm
+            let parent = [];      // Union-Find data structure for Kruskal's
+            let placingVertices = false; // Flag for vertex placement mode
+
+            // Initialize canvas size
+            function initCanvas() {
+                const container = canvas.parentElement;
+                canvas.width = container.clientWidth;
+                canvas.height = 500;
+                drawGraph();
+            }
+
+            // Draw the entire graph (vertices and edges)
+            function drawGraph() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Draw all edges first (so they appear behind vertices)
+                for (const edge of edges) {
+                    const fromVertex = vertices[edge.from - 1];
+                    const toVertex = vertices[edge.to - 1];
+                    if (!fromVertex || !toVertex) continue;
+
+                    // Set edge color based on state (included in MST, being considered, or normal)
+                    ctx.strokeStyle = edge.included ? '#4cc9f0' : edge.considered ? '#ff9900' : 'rgba(0, 0, 0, 0.2)';
+                    ctx.lineWidth = edge.included ? 4 : edge.considered ? 3 : 2;
+                    ctx.lineCap = 'round';
+
+                    // Draw the edge line
+                    ctx.beginPath();
+                    ctx.moveTo(fromVertex.x, fromVertex.y);
+                    ctx.lineTo(toVertex.x, toVertex.y);
+                    ctx.stroke();
+
+                    // Calculate midpoint for weight label
+                    const midX = (fromVertex.x + toVertex.x) / 2;
+                    const midY = (fromVertex.y + toVertex.y) / 2;
+                    
+                    // Draw weight label background
+                    ctx.fillStyle = edge.included ? 'rgba(76, 201, 240, 0.8)' : 
+                                        edge.considered ? 'rgba(255, 153, 0, 0.8)' : 'rgba(0, 0, 0, 0.7)';
+                    ctx.beginPath();
+                    ctx.arc(midX, midY, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Draw weight text
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(edge.weight.toString(), midX, midY);
+                }
+
+                // Draw all vertices
+                for (const vertex of vertices) {
+                    // Vertex circle
+                    ctx.fillStyle = '#4361ee';
+                    ctx.beginPath();
+                    ctx.arc(vertex.x, vertex.y, 18, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Add glow effect if vertex is part of an edge being considered
+                    if (edges.some(e => (e.from === vertex.id || e.to === vertex.id) && e.considered)) {
+                        ctx.shadowColor = '#ff9900';
+                        ctx.shadowBlur = 15;
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                    }
+
+                    // Vertex label (number)
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(vertex.id.toString(), vertex.x, vertex.y);
+                }
+            }
+
+            // Update the status message display
+            function updateStatus(message) {
+                statusDiv.textContent = message;
+            }
+
+            // Add a new edge to the graph
+            function addEdge() {
+                const from = parseInt(document.getElementById('edgeFrom').value);
+                const to = parseInt(document.getElementById('edgeTo').value);
+                const weight = parseInt(document.getElementById('edgeWeight').value);
+
+                // Validate inputs
+                if (isNaN(from) || isNaN(to) || isNaN(weight)) {
+                    updateStatus('Please enter valid numbers for From, To, and Weight.');
+                    return;
+                }
+
+                if (from === to) {
+                    updateStatus('From and To vertices cannot be the same.');
+                    return;
+                }
+
+                if (from < 1 || to < 1 || from > vertices.length || to > vertices.length) {
+                    updateStatus(`Vertex IDs must be between 1 and ${vertices.length}.`);
+                    return;
+                }
+
+                if (weight <= 0) {
+                    updateStatus('Weight must be a positive number.');
+                    return;
+                }
+
+                // Check if edge already exists
+                const edgeExists = edges.some(edge => 
+                    (edge.from === from && edge.to === to) || (edge.from === to && edge.to === from)
+                );
+
+                if (edgeExists) {
+                    updateStatus(`Edge between ${from} and ${to} already exists.`);
+                    return;
+                }
+
+                // Create and add the new edge
+                const newEdge = { from, to, weight, included: false, considered: false };
+                edges.push(newEdge);
+                addEdgeToTable(newEdge);
+
+                // Clear input fields
+                document.getElementById('edgeFrom').value = '';
+                document.getElementById('edgeTo').value = '';
+                document.getElementById('edgeWeight').value = '1';
+
+                drawGraph();
+                updateStatus(`Added edge ${from}-${to} with weight ${weight}.`);
+            }
+
+            // Add an edge to the edges table in the UI
+            function addEdgeToTable(edge) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${edge.from}</td>
+                    <td>${edge.to}</td>
+                    <td>${edge.weight}</td>
+                    <td><button class="delete-btn">Delete</button></td>
+                `;
+                
+                // Add delete functionality
+                row.querySelector('.delete-btn').addEventListener('click', () => {
+                    edges = edges.filter(e => !(e.from === edge.from && e.to === edge.to && e.weight === edge.weight));
+                    edgesTable.removeChild(row);
+                    drawGraph();
+                    updateStatus(`Edge ${edge.from}-${edge.to} removed.`);
+                });
+                
+                edgesTable.appendChild(row);
+            }
+
+            // Run Kruskal's algorithm
+            function runKruskalAlgorithm() {
+                // Validate graph state
+                if (vertices.length < 2) {
+                    updateStatus('Need at least 2 vertices to run the algorithm.');
+                    return;
+                }
+                if (edges.length === 0) {
+                    updateStatus('No edges in the graph. Add edges to run the algorithm.');
+                    return;
+                }
+
+                // Reset algorithm state and prepare data structures
+                resetAlgorithmState();
+                sortedEdges = [...edges].sort((a, b) => a.weight - b.weight); // Sort edges by weight
+                parent = Array(vertices.length).fill(0).map((_, i) => i); // Initialize Union-Find
+                currentStep = 0;
+                
+                // Start the step-by-step visualization
+                performAlgorithmSteps();
+            }
+
+            // Perform each step of Kruskal's algorithm with delays for visualization
+            function performAlgorithmSteps() {
+                // Check if algorithm is complete
+                if (currentStep >= sortedEdges.length) {
+                    // Finalize visualization
+                    edges.forEach(e => {
+                        e.considered = false;
+                        // Check if this edge is in MST
+                        e.included = mstEdges.some(mstEdge => 
+                            (mstEdge.from === e.from && mstEdge.to === e.to) || 
+                            (mstEdge.from === e.to && mstEdge.to === e.from)
+                        );
+                    });
+                    
+                    drawGraph();
+                    
+                    // Calculate and display MST cost
+                    const totalCost = mstEdges.reduce((sum, edge) => sum + edge.weight, 0);
+                    mstCostDiv.textContent = `Total MST Cost: ${totalCost}`;
+                    updateStatus(`Algorithm complete! MST Cost: ${totalCost}. MST edges highlighted in blue.`);
+                    return;
+                }
+
+                // Get current edge and highlight it
+                const edge = sortedEdges[currentStep];
+                edges.forEach(e => e.considered = false);
+                const originalEdge = edges.find(e => 
+                    (e.from === edge.from && e.to === edge.to) || 
+                    (e.from === edge.to && e.to === edge.from)
+                );
+                originalEdge.considered = true;
+
+                // Find roots of the vertices in the Union-Find structure
+                const rootFrom = find(edge.from - 1);
+                const rootTo = find(edge.to - 1);
+
+                // If roots are different, no cycle would be formed
+                if (rootFrom !== rootTo) {
+                    parent[rootTo] = rootFrom; // Union operation
+                    originalEdge.included = true;
+                    mstEdges.push({...originalEdge}); // Add to MST
+                    updateStatus(`Adding edge ${edge.from}-${edge.to} (weight ${edge.weight}) to MST.`);
+                } else {
+                    updateStatus(`Skipping edge ${edge.from}-${edge.to} (weight ${edge.weight}) to avoid cycle.`);
+                }
+
+                drawGraph();
+                currentStep++;
+
+                // Continue with next step after delay (for visualization)
+                if (currentStep < sortedEdges.length) {
+                    setTimeout(performAlgorithmSteps, 1500);
+                } else {
+                    // If this was the last step, immediately show final result
+                    setTimeout(() => {
+                        edges.forEach(e => {
+                            e.considered = false;
+                            e.included = mstEdges.some(mstEdge => 
+                                (mstEdge.from === e.from && mstEdge.to === e.to) || 
+                                (mstEdge.from === e.to && mstEdge.to === e.from)
+                            );
+                        });
+                        drawGraph();
+                        const totalCost = mstEdges.reduce((sum, edge) => sum + edge.weight, 0);
+                        mstCostDiv.textContent = `Total MST Cost: ${totalCost}`;
+                        updateStatus(`Algorithm complete! MST Cost: ${totalCost}. MST edges highlighted in blue.`);
+                    }, 1500);
+                }
+            }
+
+            // Union-Find find operation with path compression
+            function find(u) {
+                if (parent[u] !== u) {
+                    parent[u] = find(parent[u]); // Path compression
+                }
+                return parent[u];
+            }
+
+            // Reset the algorithm visualization state
+            function resetAlgorithmState() {
+                edges.forEach(edge => { 
+                    edge.included = false; 
+                    edge.considered = false; 
+                });
+                mstEdges = [];
+                currentStep = 0;
+                mstCostDiv.textContent = '';
+                drawGraph();
+            }
+
+            // Reset the entire simulation
+            function resetSimulation() {
+                resetAlgorithmState();
+                updateStatus('Algorithm reset. You can now step through again or modify the graph.');
+            }
+
+            // Initialize canvas and set up event listeners
+            initCanvas();
+            window.addEventListener('resize', initCanvas);
+
+            // Set up button event listeners
+            document.getElementById('placeVertices').addEventListener('click', function() {
+                placingVertices = true;
+                updateStatus('Click on the canvas to place vertices.');
+            });
+
+            document.getElementById('clearVertices').addEventListener('click', function() {
+                vertices = [];
+                edges = [];
+                edgesTable.innerHTML = '';
+                mstEdges = [];
+                mstCostDiv.textContent = '';
+                drawGraph();
+                updateStatus('Vertices and edges cleared.');
+            });
+
+            document.getElementById('addEdge').addEventListener('click', addEdge);
+            document.getElementById('runAlgorithm').addEventListener('click', runKruskalAlgorithm);
+            document.getElementById('reset').addEventListener('click', resetSimulation);
+
+            // Handle canvas clicks for vertex placement
+            canvas.addEventListener('click', function(e) {
+                if (placingVertices) {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    const vertexCountInput = document.getElementById('vertexCount');
+                    const maxVertices = parseInt(vertexCountInput.value);
+
+                    // Check if we've reached max vertices
+                    if (vertices.length >= maxVertices) {
+                        updateStatus(`Maximum number of vertices (${maxVertices}) reached.`);
+                        placingVertices = false;
+                        return;
+                    }
+
+                    // Add new vertex
+                    const newId = vertices.length + 1;
+                    vertices.push({ id: newId, x: x, y: y });
+
+                    drawGraph();
+                    updateStatus(`Added vertex ${newId} at (${Math.round(x)}, ${Math.round(y)}).`);
+
+                    // Check if we've placed all requested vertices
+                    if (vertices.length >= maxVertices) {
+                        placingVertices = false;
+                        updateStatus('Vertex placement complete. Now add edges.');
+                    }
+                }
+            });
+        }
+
+        /**
+         * MAIN INITIALIZATION
+         * Set up the application when DOM is loaded
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            setupWelcomePopup();
+            initBackground();
+            setupThemeToggle();
+            initGraph();
+        });
+    </script>
+</body>
+</html>
